@@ -37,7 +37,7 @@ pipeline {
             }
         }
 
-        stage ('CODE ANALYSIS WITH CHECKSTYLE'){
+        stage('CODE ANALYSIS WITH CHECKSTYLE'){
             steps {
                 sh 'mvn checkstyle:checkstyle'
             }
@@ -99,12 +99,11 @@ pipeline {
 
         stage('Kubernetes Deploy') {
             agent {label 'Kops'}
-                steps {
-                    sh "helm --upgrade -- install \
-                    --force vprofile-stack helm/vprofilecharts \
-                    --set appimage=${registry}:V${BUILD_NUMBER} \
-                    --namespace prod"
-                }
+            steps {
+                sh "helm --upgrade -- install \
+                --force vprofile-stack helm/vprofilecharts \
+                --set appimage=${registry}:V${BUILD_NUMBER} \
+                --namespace prod"
             }
         }
 
