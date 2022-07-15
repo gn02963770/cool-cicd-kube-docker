@@ -80,35 +80,33 @@ pipeline {
             }
         }
 
-
-            stage('Upload Image') {
-                steps{
-                    script {
-                        docker.withRegistry('', registryCredential) {
-                            dockerImage.push("V$BUILD_NUMBER")
-                            dockerImage.push('latest')
-                        }
+        stage('Upload Image') {
+            steps{
+                script {
+                    docker.withRegistry('', registryCredential) {
+                        dockerImage.push("V$BUILD_NUMBER")
+                        dockerImage.push('latest')
                     }
                 }
             }
+        }
 
+        stage('Remove Unused docker Image') {
+            steps{
+                sh "docker rmi $registry:V$BUILD_NUMBER"
+            }
+        }
 
-
-            stage('Remove Unused docker Image') {
-                steps{
-                    sh "docker rmi $registry:V$BUILD_NUMBER"
+        stage('Kubernetes Deploy') {
+            agent {label 'Kops'}
+                steps {
+                    sh "helm --upgrade -- install \
+                    --force vprofile-stack helm/vprofilecharts \
+                    --set appimage=${registry}:V${BUILD_NUMBER} \
+                    --namespace prod"
                 }
             }
-
-            stage('Kubernetes Deploy') {
-                agent {lebel 'Kops'}
-                    steps {
-                        sh "helm --upgrade -- install \
-                        --force vprofile-stack helm/vprofilecharts \
-                        --set appimage=${registry}:V${BUILD_NUMBER} \
-                        --namespace prod"
-                    }
-            }
+        }
 
     }
 
