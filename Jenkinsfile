@@ -74,7 +74,7 @@ pipeline {
 
     }
 
-    stage('Build App Image') {
+    stages('Build App Image') {
         steps {
             script {
                 dockerImage = docker.build registry + ":V$BUILD_NUMBER"
@@ -82,7 +82,7 @@ pipeline {
         }
     }
 
-    stage('Upload Image') {
+    stages('Upload Image') {
         steps{
             script {
                 docker.withRegistry('', registryCredential) {
@@ -93,13 +93,13 @@ pipeline {
         }
     }
 
-    stage('Remove Unused docker Image') {
+    stages('Remove Unused docker Image') {
         steps{
             sh "docker rmi $registry:V$BUILD_NUMBER"
         }
     }
 
-    stage('Kubernetes Deploy') {
+    stages('Kubernetes Deploy') {
         agent {lebel 'Kops'}
             steps {
                 sh "helm --upgrade -- install \
